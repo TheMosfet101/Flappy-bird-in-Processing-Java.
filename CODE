@@ -1,0 +1,216 @@
+// Flappy bird prototype
+
+float cameraX,cameraY,ran,ran2;
+float camspeedX = 1; 
+boolean eventcheck,eventstartcheck,restartcheck,TimePaused,pipecheck,startcheck,pausecheck;
+int gameOn,score,timeReset,time,endtextX,startTextX,startTextY,cubeX,cubeY,speedY,scoreCount,ElapsedTime,PrevTime,i,ScoreCon,TimeCon,pipX,pipY,pipX2,pipX3,pip2Y,v,x,r,speedX,pausestart;
+int [] scoreStore = {0};
+int[] timeStore = {0};
+int [] pipLength2 = {0};
+int [] pipLength = {0};
+void setup(){
+  x = 1;
+  v = 2;
+  r = 3;
+  cubeX = 100;
+  cubeY = 120;
+  speedX = 3;
+  speedY = 1;
+  startTextX = 100;
+  startTextY = 90;
+  endtextX = 120;
+  scoreCount = 1;
+  pipX = 590;
+  pipY = 248; 
+  pipX2 = pipX + 250;
+  pipX3 = pipX2 + 250;
+  pip2Y = 1;
+  size(640,480);
+  for(int h = 0; h < 3; h++){
+  pipLength2 = append(pipLength2,int(floor(random(105,255))));
+  pipLength = append(pipLength,int(floor(random(220,385))));
+  }
+}
+void draw(){
+  background(173,216,230);
+  do {
+  ran = floor(random(105,255));
+  } while(abs(ran - pipLength2[pipLength2.length - 1]) < 80);
+  do {
+  ran2 = floor(random(220,385));
+  } while(abs(ran2 - pipLength[pipLength.length - 1]) < 90);
+  if(cubeX - cameraX > width * 2/3) {
+    cameraX = cubeX - width * 2/3;
+    endtextX = cubeX - 200;
+    pipecheck = true;
+  } else if(cubeX - cameraX < width / 3) {
+    cameraX = cubeX - width / 3;
+  }
+  translate(-cameraX,0);
+  pushStyle();
+  rectMode(CENTER);
+  fill(255,234,0);
+  stroke(255,234,0);
+  rect(cubeX,cubeY,20,20);
+  popStyle();
+  if(eventstartcheck) {
+    ElapsedTime += time - PrevTime;
+    PrevTime = time;
+    time = millis();
+    if(time - 200 >= 2000) {
+      ScoreCon = score / 100;
+      TimeCon = ElapsedTime / 1000;
+      timeReset = time;
+    }
+  }
+  if(gameOn >= 1){
+    gameStart();
+    eventstartcheck = true;
+  }
+  if(cubeY >= 480 - 20){
+    GameReset();
+    startcheck = true;
+  } else if((cubeX > pipX && cubeX < pipX + 70 && cubeY > pipY + (pipLength[x] - 180) && cubeY < pipY + (pipLength[x] - 180) + pipLength[x]) || (cubeX > pipX2 && cubeX < pipX2 + 70 && cubeY > pipY + (pipLength[v] - 180) && cubeY < pipY + (pipLength[v] - 180) + pipLength[v]) || (cubeX > pipX3 && cubeX < pipX3 + 70 && cubeY > pipY + (pipLength[r] - 180) && cubeY < pipY + (pipLength[r] - 180) + pipLength[r])){
+    GameReset();
+    startcheck = true;
+  } else if(cubeY <= -30){
+    GameReset();
+    startcheck = true;
+  } else if((cubeX > pipX && cubeX < pipX + 70 && cubeY > pip2Y && cubeY < pip2Y + pipLength2[x]) || (cubeX > pipX2 && cubeX < pipX2 + 70 && cubeY > pip2Y && cubeY < pip2Y + pipLength2[v]) || (cubeX > pipX3 && cubeX < pipX3 + 70 && cubeY > pip2Y && cubeY < pip2Y + pipLength2[r])) {
+   GameReset();
+   startcheck = true;
+  } else {
+    restartcheck = false;
+  }
+  if(TimePaused){
+    time = 0;
+    PrevTime = 0;
+  }
+
+  if(pipecheck){
+    pushStyle();
+    fill(0,255,0);
+    strokeWeight(.75);
+    rect(pipX,pipY + (pipLength[x] - 180),70,pipLength[x]); 
+    rect(pipX2,pipY + (pipLength[v] - 180),70,pipLength[v]); 
+    rect(pipX3,pipY + (pipLength[r] - 180),70,pipLength[r]);
+    rect(pipX,pip2Y,70,pipLength2[x]); 
+    rect(pipX2,pip2Y,70,pipLength2[v]); 
+    rect(pipX3,pip2Y,70,pipLength2[r]); 
+    popStyle();
+  }
+ if(restartcheck){
+   textSize(20);
+    text("Game over", endtextX + 50,123); 
+    pushStyle();
+    rectMode(CENTER);
+    textSize(15);
+    fill(255);
+    text("Do you want to try again by pressing 'R'?",endtextX,150);
+    popStyle();
+ }
+ if(pausestart == 1){
+    pushStyle();
+    textSize(17);
+    text("Game paused: Press 'p' again to resume",endtextX,155);
+    popStyle();
+    speedX = 0;
+    speedY = 0;
+    PrevTime = 0;
+    time = 0;
+    scoreCount = 0;
+  } else if(pausestart == 2){
+    pausestart = 0;
+    scoreCount = 1;
+    speedX = 3;
+    speedY = 1;
+    PrevTime = time;
+    time = millis();
+    startcheck = false;
+  }
+  if(pipX + 70 < cameraX){
+    pipX = pipX3;
+    pipX += 250;
+    x ++;
+  pipLength2 = append(pipLength2,int(ran));
+  pipLength = append(pipLength,int(ran2));
+  }
+  if(pipX2 + 70 < cameraX){
+    pipX2 = pipX;
+    pipX2 += 250;
+    v ++;
+  pipLength2 = append(pipLength2,int(ran));
+  pipLength = append(pipLength,int(ran2));
+  }
+  if(pipX3 + 70 < cameraX){
+    pipX3 = pipX2;
+    pipX3 += 250;
+    r ++;
+  pipLength2 = append(pipLength2,int(ran));
+  pipLength = append(pipLength,int(ran2));
+  }
+  if(cubeX >= pipX || cubeX >= pipX2 || cubeX >= pipX3){
+    score += scoreCount;
+  }
+  textSize(15);
+  text("Press 'e' to start and 'p' to pause",startTextX,startTextY);
+  text("Previous  score: " + scoreStore[i] + " - Previous  time: " + timeStore[i],cameraX + 20,15);
+  text("Highest score: " + max(scoreStore) + " - Highest time: " + max(timeStore),cameraX + 300,15);
+  textSize(20);
+  text("Score: " + ScoreCon + "  - Time in seconds: " + TimeCon, cameraX + 100, 50);
+}
+void keyPressed(){
+  if(key == 'w' && !eventcheck && !startcheck) { 
+    speedY = -10;
+    eventcheck = true;
+  } else if(key == 'e' && !startcheck){
+    gameOn ++;
+    time = millis();
+    ElapsedTime = 0;
+    PrevTime = time;
+    TimePaused = false;
+  } else if(key == 'r' && restartcheck) {
+    GameRStats();
+  } else if(key == 'p' && pausecheck){
+    startcheck = true;
+    pausestart ++;
+  }
+}
+void keyReleased(){
+  eventcheck = false;
+}
+void gameStart(){
+  pausecheck = true;
+  cubeX += speedX;
+  cubeY += speedY;
+  speedY += 1;
+  startTextX = -15;
+  startTextY = -15;
+} 
+void GameRStats(){
+  startcheck = false;
+  pipX = 590;
+  pipY = 248; 
+  pipX2 = pipX + 250;
+  pipX3 = pipX2 + 250;
+  ElapsedTime = 0;
+  cubeX = 100;
+  cubeY = 120;
+  speedY = 1;
+  startTextX = 100;
+  startTextY = 90;
+  endtextX = 120;
+  score = 0;
+  scoreCount = 1;
+}
+void GameReset(){
+   i ++;
+    scoreStore = append(scoreStore,ScoreCon);
+    timeStore = append(timeStore,TimeCon);
+    TimePaused = true;
+    restartcheck = true;
+    scoreCount = 0;
+    gameOn = 0;
+    pausecheck = false;
+    pausestart = 0;
+}
